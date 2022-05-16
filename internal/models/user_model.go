@@ -5,6 +5,6 @@ type User struct {
 	FirstName       string
 	LastName        string
 	Age             int
-	PhoneNumber     int
+	PhoneNumber     string
 	IsPhoneVerified bool
 }

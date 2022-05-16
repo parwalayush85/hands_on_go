@@ -5,6 +5,6 @@ type getUserByIdResponse struct {
 	FirstName       string `json:"first_name"`
 	LastName        string `json:"last_name"`
 	Age             int    `json:"age"`
-	PhoneNumber     int    `json:"Phone number"`
+	PhoneNumber     string `json:"Phone number"`
 	IsPhoneVerified bool   `json:"Verified Phone number"`
 }
