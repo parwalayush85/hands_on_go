@@ -11,9 +11,11 @@ type UserRepository interface {
 	checkExistsById(userId int) (bool, error)
 	deleteById(userId int) error
 	getUserById(userId int) (*models.User, error)
+	CreateNewUser(user *models.User) (int, error)
 }
+
 type UserServiceImpl struct {
-	userRepository UserRepository
+	userRepository UserRepositoryImpl
 }
 
 func NewUserServiceImpl(userRepository UserRepository) *UserServiceImpl {
@@ -53,6 +55,7 @@ func (u *UserServiceImpl) DeleteUserById(id int) error {
 	return nil
 }
 func (u *UserServiceImpl) CreateNewUser(user *models.User) (int, error) {
+	u.userRepository.CreateNewUser(user)
 	return user.ID, nil
 }
 func ErrorReturn(err error, kind blerr.Kind) error {
