@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -24,73 +25,40 @@ func NewUserController(uservalidator UserValidator, userService service.UserServ
 	}
 }
 
-func (u *UserController) GetUserById(writer http.ResponseWriter, reader *http.Request) {
+func (u *UserController) GetUserById(writer http.ResponseWriter, reader *http.Request) error {
 	id, err := u.validator.ValidateGetUserById(reader)
-	if errors.Is(err, blerr.ErrInvalidInput) {
-		writer.WriteHeader(400)
-		writer.Write([]byte("Request not valid"))
-		return
-	}
 	if err != nil {
-		logrus.WithError(err).Error("error while validating user")
-		writer.WriteHeader(500)
-		writer.Write([]byte("An unexpected error has occured"))
-		return
+		return fmt.Errorf("Validating request : %w", err)
 	}
 	user, err := u.userService.GetUserDetailsById(id)
-	if errors.Is(err, blerr.ErrUserNotFound) {
-		writer.WriteHeader(404)
-		writer.Write([]byte("User Not Found"))
-		return
-	}
 	if err != nil {
-		logrus.WithError(err).Error("error while getting user Info")
-		writer.WriteHeader(500)
-		writer.Write([]byte("An unexpected error has occured"))
-		return
+		return fmt.Errorf("User service request : %w", err)
 	}
 	getUserByIdResponse := u.toGetByIDResponse(user)
 	getUserById, err := json.Marshal(getUserByIdResponse)
 	if err != nil {
-		logrus.WithError(err).Error("error while getting mapping user Info")
-		writer.WriteHeader(500)
-		writer.Write([]byte("An unexpected error has occured"))
-		return
+		return fmt.Errorf("Json marshal error : %w", err)
 	}
 	writer.Write(getUserById)
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
 	logrus.Info(user)
+	return nil
 }
 
-func (u *UserController) DeleteUserById(writer http.ResponseWriter, reader *http.Request) {
+func (u *UserController) DeleteUserById(writer http.ResponseWriter, reader *http.Request) error {
 	id, err := u.validator.ValidateGetUserById(reader)
-	if errors.Is(err, blerr.ErrInvalidInput) {
-		writer.WriteHeader(400)
-		writer.Write([]byte("Request not valid"))
-		return
-	}
 	if err != nil {
-		logrus.WithError(err).Error("error while validating user")
-		writer.WriteHeader(500)
-		writer.Write([]byte("An unexpected error has occured"))
-		return
+		return fmt.Errorf("Validating request : %w", err)
 	}
 	err = u.userService.DeleteUserById(id)
-	if errors.Is(err, blerr.ErrUserNotFound) {
-		writer.WriteHeader(404)
-		writer.Write([]byte("User Not Found"))
-		return
-	}
 	if err != nil {
-		logrus.WithError(err).Error("error while getting user Info")
-		writer.WriteHeader(500)
-		writer.Write([]byte("An unexpected error has occured"))
-		return
+		return fmt.Errorf("User service request : %w", err)
 	}
 
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusNoContent)
+	return nil
 }
 func (u *UserController) CreateNewUser(writer http.ResponseWriter, reader *http.Request) {
 	id, err := u.validator.ValidateNewUser(reader)
