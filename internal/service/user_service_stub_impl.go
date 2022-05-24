@@ -15,7 +15,7 @@ type UserRepository interface {
 }
 
 type UserServiceImpl struct {
-	userRepository UserRepositoryImpl
+	userRepository UserRepository
 }
 
 func NewUserServiceImpl(userRepository UserRepository) *UserServiceImpl {
