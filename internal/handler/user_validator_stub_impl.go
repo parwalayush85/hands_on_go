@@ -17,7 +17,7 @@ type UserValidatorImpl struct {
 func (u *UserValidatorImpl) ValidateGetUserById(r *http.Request) (int, error) {
 	id, err := validateIdPaths(nil, r)
 	if err != nil {
-		return 0, blerr.ErrInvalidInput
+		return 0, ErrorReturn(err, blerr.KindInvalidInput)
 	}
 	return id, nil
 }
@@ -46,17 +46,17 @@ func (u *UserValidatorImpl) ValidateNewUser(r *http.Request) (*CreateUserRequest
 	err = validateInputs(err, user.LastName, "LastName")
 	err = validateInputs(err, user.PhoneNumber, "PhoneNumber")
 	if err != nil {
-		return nil, blerr.ErrInvalidInput
+		return nil, ErrorReturn(err, blerr.KindInvalidInput)
 	}
 	if len(*user.FirstName) <= 0 || len(*user.FirstName) > 100 {
-		return nil, blerr.ErrInvalidInput
+		return nil, ErrorReturn(err, blerr.KindInvalidInput)
 	}
 	if len(*user.LastName) <= 0 || len(*user.LastName) > 100 {
-		return nil, blerr.ErrInvalidInput
+		return nil, ErrorReturn(err, blerr.KindInvalidInput)
 	}
 	logrus.Info(len(*user.PhoneNumber))
 	if len(*user.PhoneNumber) <= 0 || len(*user.PhoneNumber) > 25 {
-		return nil, blerr.ErrInvalidInput
+		return nil, ErrorReturn(err, blerr.KindInvalidInput)
 	}
 	// if reflect.TypeOf(user.Age) ==int{
 
@@ -75,14 +75,7 @@ func validateInputs[T any](err error, value *T, valueName string) error {
 	}
 	return nil
 }
-
-// func validateInputSize[T any](err error, value *T, valueName string, maxSize int, minSize int) error {
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	if len(value)>=minSize&& len(value)<=maxSize{
-
-// 	}
-// 	return nil
-// }
+func ErrorReturn(err error, kind blerr.Kind) error {
+	err = blerr.SetUserMsgError(err, err.Error())
+	return blerr.SetKind(err, kind)
+}
